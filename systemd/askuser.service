@@ -1,0 +1,19 @@
+[Unit]
+Description=Ask user agent
+
+[Service]
+ExecStart=/usr/bin/askuser
+
+Type=notify
+
+KillMode=process
+TimeoutStopSec=3
+Restart=always
+
+UMask=0000
+NoNewPrivileges=true
+
+#Environment="ASKUSER_LOG_LEVEL=LOG_DEBUG"
+
+[Install]
+WantedBy=multi-user.target
