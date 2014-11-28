@@ -9,12 +9,11 @@ Source1001:    %{name}.manifest
 Source1002:    libaskuser-common.manifest
 Source1003:    askuser-plugins.manifest
 BuildRequires: cmake
-BuildRequires: zip
+BuildRequires: pkgconfig(cynara-agent)
+BuildRequires: pkgconfig(cynara-plugin)
 BuildRequires: pkgconfig(libsystemd-daemon)
 BuildRequires: pkgconfig(libsystemd-journal)
-BuildRequires: pkgconfig(cynara-plugin)
-BuildRequires: pkgconfig(cynara-agent)
-
+BuildRequires: zip
 %{?systemd_requires}
 
 %if !%{defined build_type}

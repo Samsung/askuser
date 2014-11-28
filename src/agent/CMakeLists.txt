@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+# Copyright (c) 2014-2015 Samsung Electronics Co., Ltd All Rights Reserved
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -16,6 +16,12 @@
 # @author      Adam Malinowski <a.malinowsk2@partner.samsung.com>
 #
 
+PKG_CHECK_MODULES(AGENT_DEP
+    REQUIRED
+    cynara-agent
+    cynara-plugin
+    )
+
 SET(ASKUSER_AGENT_PATH ${ASKUSER_PATH}/agent)
 
 SET(ASKUSER_SOURCES
@@ -25,12 +31,14 @@ SET(ASKUSER_SOURCES
 
 INCLUDE_DIRECTORIES(
     ${ASKUSER_PATH}/common
+    ${AGENT_DEP_INCLUDE_DIRS}
     ${ASKUSER_AGENT_PATH}
     )
 
 ADD_EXECUTABLE(${TARGET_ASKUSER} ${ASKUSER_SOURCES})
 
 TARGET_LINK_LIBRARIES(${TARGET_ASKUSER}
+    ${AGENT_DEP_LIBRARIES}
     ${ASKUSER_DEP_LIBRARIES}
     ${TARGET_ASKUSER_COMMON}
     )
