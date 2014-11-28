@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+ * Copyright (c) 2014-2015 Samsung Electronics Co., Ltd All Rights Reserved
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,12 +14,15 @@
  *    limitations under the License.
  */
 /**
- * @file        src/agent/main/Agent.h
+ * @file        Agent.h
  * @author      Adam Malinowski <a.malinowsk2@partner.samsung.com>
  * @brief       This file defines main class of ask user agent
  */
 
 #pragma once
+
+#include <main/CynaraTalker.h>
+#include <main/Request.h>
 
 namespace AskUser {
 
@@ -33,8 +36,12 @@ public:
     void run();
 
 private:
+    CynaraTalker m_cynaraTalker;
+
     void init();
     void finish();
+
+    void requestHandler(Request *request);
 };
 
 } // namespace Agent

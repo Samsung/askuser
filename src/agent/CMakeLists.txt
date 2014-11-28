@@ -26,6 +26,7 @@ SET(ASKUSER_AGENT_PATH ${ASKUSER_PATH}/agent)
 
 SET(ASKUSER_SOURCES
     ${ASKUSER_AGENT_PATH}/main/Agent.cpp
+    ${ASKUSER_AGENT_PATH}/main/CynaraTalker.cpp
     ${ASKUSER_AGENT_PATH}/main/main.cpp
     )
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+ * Copyright (c) 2014-2015 Samsung Electronics Co., Ltd All Rights Reserved
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 /**
- * @file        src/agent/main/Agent.cpp
+ * @file        Agent.cpp
  * @author      Adam Malinowski <a.malinowsk2@partner.samsung.com>
  * @brief       This file implements main class of ask user agent
  */
@@ -29,7 +29,7 @@ namespace AskUser {
 
 namespace Agent {
 
-Agent::Agent() {
+Agent::Agent() : m_cynaraTalker([&](Request *request) -> void { requestHandler(request); }) {
     init();
 }
 
@@ -44,7 +44,10 @@ void Agent::init() {
 }
 
 void Agent::run() {
-    // TODO: implement real task
+    m_cynaraTalker.start();
+
+    // TODO: wait for requests
+
     while (true) {
         sleep(1);
     }
@@ -56,6 +59,15 @@ void Agent::finish() {
     // TODO: implement if needed
 
     LOGD("Agent daemon has stopped commonly");
+}
+
+void Agent::requestHandler(Request *request) {
+    LOGD("Cynara request received:"
+         " type [" << request->type() << "],"
+         " id [" << request->id() << "],"
+         " data length: [" << request->data().size() << "]");
+
+    delete request;
 }
 
 } // namespace Agent
