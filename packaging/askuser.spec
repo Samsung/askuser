@@ -11,6 +11,9 @@ BuildRequires: cmake
 BuildRequires: zip
 BuildRequires: pkgconfig(libsystemd-daemon)
 BuildRequires: pkgconfig(libsystemd-journal)
+BuildRequires: pkgconfig(cynara-plugin)
+BuildRequires: pkgconfig(cynara-agent)
+
 %{?systemd_requires}
 
 %if !%{defined build_type}
