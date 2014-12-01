@@ -20,14 +20,21 @@
  */
 
 #include <unistd.h>
+#include <utility>
 
+#include <attributes/attributes.h>
 #include <log/log.h>
+#include <translator/Translator.h>
+#include <types/AgentErrorMsg.h>
+#include <types/SupportedTypes.h>
 
 #include "Agent.h"
 
 namespace AskUser {
 
 namespace Agent {
+
+volatile sig_atomic_t Agent::m_stopFlag = 0;
 
 Agent::Agent() : m_cynaraTalker([&](Request *request) -> void { requestHandler(request); }) {
     init();
@@ -46,17 +53,41 @@ void Agent::init() {
 void Agent::run() {
     m_cynaraTalker.start();
 
-    // TODO: wait for requests
+    while (!m_stopFlag) {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        m_event.wait(lock);
 
-    while (true) {
-        sleep(1);
+        while (!m_incomingRequests.empty()) {
+            Request *request = m_incomingRequests.front();
+            m_incomingRequests.pop();
+            lock.unlock();
+
+            LOGD("Request popped from queue:"
+                 " type [" << request->type() << "],"
+                 " id [" << request->id() << "],"
+                 " data length [" << request->data().size() << "]");
+
+            if (request->type() == RT_Close) {
+                delete request;
+                m_stopFlag = 1;
+                break;
+            }
+
+            processCynaraRequest(request);
+
+            lock.lock();
+        }
+
+        //TODO: do sth here with available data from UIs
     }
 
-    LOGD("Ask user agent task stopped");
+    //TODO: dismiss all threads if possible
+
+    LOGD("Agent task stopped");
 }
 
 void Agent::finish() {
-    // TODO: implement if needed
+    m_cynaraTalker.stop();
 
     LOGD("Agent daemon has stopped commonly");
 }
@@ -67,7 +98,45 @@ void Agent::requestHandler(Request *request) {
          " id [" << request->id() << "],"
          " data length: [" << request->data().size() << "]");
 
-    delete request;
+    std::unique_lock<std::mutex> lock(m_mutex);
+    m_incomingRequests.push(request);
+    m_event.notify_one();
+}
+
+void Agent::processCynaraRequest(Request *request) {
+    std::unique_ptr<Request> requestPtr(request);
+
+    auto existingRequest = m_requests.find(request->id());
+    if (existingRequest != m_requests.end()) {
+        if (request->type() == RT_Cancel) {
+            delete existingRequest->second;
+            m_requests.erase(existingRequest);
+            m_cynaraTalker.sendResponse(request->type(), request->id());
+            //TODO: get UI for request and dismiss or update it
+        } else {
+            LOGE("Incoming request with ID: [" << request->id() << "] is being already processed");
+        }
+        return;
+    }
+
+    if (request->type() == RT_Cancel) {
+        LOGE("Cancel request for unknown request: ID: [" << request->id() << "]");
+        return;
+    }
+
+    if (!startUIForRequest(request)) {
+        auto data = Translator::Agent::answerToData(Cynara::PolicyType(), AgentErrorMsg::Error);
+        m_cynaraTalker.sendResponse(RT_Action, request->id(), data);
+        return;
+    }
+
+    m_requests.insert(std::make_pair(request->id(), request));
+    requestPtr.release();
+}
+
+bool Agent::startUIForRequest(Request *request UNUSED) {
+    // TODO: start UI for request
+    return false;
 }
 
 } // namespace Agent

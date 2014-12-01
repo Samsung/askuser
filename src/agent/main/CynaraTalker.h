@@ -45,7 +45,8 @@ public:
     bool start();
     bool stop();
 
-    bool sendResponse(RequestType requestType, RequestId requestId, const Cynara::PluginData &data);
+    bool sendResponse(RequestType requestType, RequestId requestId,
+                      const Cynara::PluginData &data = Cynara::PluginData());
 
 private:
     RequestHandler m_requestHandler;
