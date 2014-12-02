@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2014 Samsung Electronics Co.
+ *  Copyright (c) 2014-2015 Samsung Electronics Co.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@
 namespace AskUser {
 namespace AgentErrorMsg {
 
+extern const std::string NoError;
 extern const std::string Error;
 extern const std::string Timeout;
 

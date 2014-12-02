@@ -19,6 +19,9 @@
  * @brief       This file implements main class of ask user agent
  */
 
+#include <memory>
+#include <sstream>
+#include <string>
 #include <unistd.h>
 #include <utility>
 
@@ -57,28 +60,48 @@ void Agent::run() {
         std::unique_lock<std::mutex> lock(m_mutex);
         m_event.wait(lock);
 
-        while (!m_incomingRequests.empty()) {
-            Request *request = m_incomingRequests.front();
-            m_incomingRequests.pop();
-            lock.unlock();
+        while (!m_incomingRequests.empty() || !m_incomingResponses.empty()) {
 
-            LOGD("Request popped from queue:"
-                 " type [" << request->type() << "],"
-                 " id [" << request->id() << "],"
-                 " data length [" << request->data().size() << "]");
+            if (!m_incomingRequests.empty()) {
+                Request *request = m_incomingRequests.front();
+                m_incomingRequests.pop();
+                lock.unlock();
 
-            if (request->type() == RT_Close) {
-                delete request;
-                m_stopFlag = 1;
-                break;
+                LOGD("Request popped from queue:"
+                     " type [" << request->type() << "],"
+                     " id [" << request->id() << "],"
+                     " data length [" << request->data().size() << "]");
+
+                if (request->type() == RT_Close) {
+                    delete request;
+                    m_stopFlag = 1;
+                    break;
+                }
+
+                processCynaraRequest(request);
+
+                lock.lock();
             }
 
-            processCynaraRequest(request);
+            if (!m_incomingResponses.empty()) {
+                Response response = m_incomingResponses.front();
+                m_incomingResponses.pop();
+                lock.unlock();
 
+                LOGD("Response popped from queue:"
+                     " type [" << response.type() << "],"
+                     " id [" << response.id() << "]");
+
+                processUIResponse(response);
+
+                lock.lock();
+            }
+
+            lock.unlock();
+            cleanupUIThreads();
             lock.lock();
         }
 
-        //TODO: do sth here with available data from UIs
     }
 
     //TODO: dismiss all threads if possible
@@ -112,7 +135,7 @@ void Agent::processCynaraRequest(Request *request) {
             delete existingRequest->second;
             m_requests.erase(existingRequest);
             m_cynaraTalker.sendResponse(request->type(), request->id());
-            //TODO: get UI for request and dismiss or update it
+            dismissUI(request->id());
         } else {
             LOGE("Incoming request with ID: [" << request->id() << "] is being already processed");
         }
@@ -134,9 +157,84 @@ void Agent::processCynaraRequest(Request *request) {
     requestPtr.release();
 }
 
-bool Agent::startUIForRequest(Request *request UNUSED) {
-    // TODO: start UI for request
-    return false;
+void Agent::processUIResponse(const Response &response) {
+    auto requestIt = m_requests.find(response.id());
+    if (requestIt != m_requests.end()) {
+        Cynara::PluginData pluginData;
+        if (response.type() == URT_ERROR) {
+            pluginData = Translator::Agent::answerToData(Cynara::PolicyType(),
+                                                         AgentErrorMsg::Error);
+        } else if (response.type() == URT_TIMEOUT) {
+            pluginData = Translator::Agent::answerToData(Cynara::PolicyType(),
+                                                         AgentErrorMsg::Timeout);
+        } else {
+            pluginData = Translator::Agent::answerToData(
+                                            UIResponseToPolicyType(response.type()),
+                                                                   AgentErrorMsg::NoError);
+        }
+        m_cynaraTalker.sendResponse(RT_Action, requestIt->second->id(), pluginData);
+        delete requestIt->second;
+        m_requests.erase(requestIt);
+    }
+
+    dismissUI(response.id());
+}
+
+bool Agent::startUIForRequest(Request *request) {
+    auto data = Translator::Agent::dataToRequest(request->data());
+    AskUIInterfacePtr ui; // TODO: create pointer to backend
+
+    auto handler = [&](RequestId requestId, UIResponseType resultType) -> void {
+                       UIResponseHandler(requestId, resultType);
+                   };
+    bool ret = ui->start(data.client, data.user, data.privilege, request->id(), handler);
+    if (ret) {
+        m_UIs.insert(std::make_pair(request->id(), std::move(ui)));
+    }
+    return ret;
+}
+
+void Agent::UIResponseHandler(RequestId requestId, UIResponseType responseType) {
+    LOGD("UI response received: type [" << responseType << "], id [" << requestId << "]");
+
+    std::unique_lock<std::mutex> lock(m_mutex);
+    m_incomingResponses.push(Response(requestId, responseType));
+    m_event.notify_one();
+}
+
+bool Agent::cleanupUIThreads() {
+    bool ret = true;
+    for (auto it = m_UIs.begin(); it != m_UIs.end();) {
+        if (it->second->isDismissing() && it->second->dismiss()) {
+            it = m_UIs.erase(it);
+        } else {
+            ret = false;
+            ++it;
+        }
+    }
+    return ret;
+}
+
+void Agent::dismissUI(RequestId requestId) {
+    auto it = m_UIs.find(requestId);
+    if (it != m_UIs.end()) {
+        if (it->second->dismiss()) {
+            it = m_UIs.erase(it);
+        }
+    }
+}
+
+Cynara::PolicyType Agent::UIResponseToPolicyType(UIResponseType responseType) {
+    switch (responseType) {
+        case URT_YES:
+            return AskUser::SupportedTypes::Client::ALLOW_ONCE;
+        case URT_SESSION:
+            return AskUser::SupportedTypes::Client::ALLOW_PER_SESSION;
+        case URT_NO:
+            return Cynara::PredefinedPolicyType::DENY;
+        default:
+            return Cynara::PredefinedPolicyType::DENY;
+    }
 }
 
 } // namespace Agent

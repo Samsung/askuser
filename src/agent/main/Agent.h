@@ -26,9 +26,13 @@
 #include <map>
 #include <mutex>
 #include <queue>
+#include <types/PolicyType.h>
 
 #include <main/CynaraTalker.h>
 #include <main/Request.h>
+#include <main/Response.h>
+
+#include <ui/AskUIInterface.h>
 
 namespace AskUser {
 
@@ -49,9 +53,11 @@ private:
     CynaraTalker m_cynaraTalker;
     std::map<RequestId, Request *> m_requests;
     std::queue<Request *> m_incomingRequests;
+    std::queue<Response> m_incomingResponses;
     std::condition_variable m_event;
     std::mutex m_mutex;
     static volatile sig_atomic_t m_stopFlag;
+    std::map<RequestId, AskUIInterfacePtr> m_UIs;
 
     void init();
     void finish();
@@ -59,6 +65,13 @@ private:
     void requestHandler(Request *request);
     void processCynaraRequest(Request *request);
     bool startUIForRequest(Request *request);
+    void UIResponseHandler(RequestId requestId, UIResponseType responseType);
+
+    void processUIResponse(const Response &response);
+    bool cleanupUIThreads();
+    void dismissUI(RequestId requestId);
+
+    static Cynara::PolicyType UIResponseToPolicyType(UIResponseType responseType);
 };
 
 } // namespace Agent
