@@ -39,6 +39,11 @@ const Cynara::PolicyType ALLOW_ONCE = 11;
 const Cynara::PolicyType ALLOW_PER_SESSION = 12;
 // This one will never reach client, but will be interpreted in service plugin
 const Cynara::PolicyType ALLOW_PER_LIFE = 13;
+
+const Cynara::PolicyType DENY_ONCE = 14;
+const Cynara::PolicyType DENY_PER_SESSION = 15;
+// This one will never reach client, but will be interpreted in service plugin
+const Cynara::PolicyType DENY_PER_LIFE = 16;
 } //namespace Client
 
 } //namespace SupportedTypes

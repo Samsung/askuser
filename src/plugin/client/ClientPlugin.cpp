@@ -32,7 +32,10 @@ using namespace Cynara;
 namespace AskUser {
 const std::vector<PolicyType> clientTypes = {
         SupportedTypes::Client::ALLOW_ONCE,
-        SupportedTypes::Client::ALLOW_PER_SESSION
+        SupportedTypes::Client::ALLOW_PER_SESSION,
+
+        SupportedTypes::Client::DENY_ONCE,
+        SupportedTypes::Client::DENY_PER_SESSION
 };
 
 class ClientPlugin : public ClientPluginInterface {
@@ -42,7 +45,8 @@ public:
     }
 
     bool isCacheable(const ClientSession &session UNUSED, const PolicyResult &result) {
-        return (result.policyType() == SupportedTypes::Client::ALLOW_PER_SESSION);
+        return (result.policyType() == SupportedTypes::Client::ALLOW_PER_SESSION
+                || result.policyType() == SupportedTypes::Client::DENY_PER_SESSION);
     }
 
     bool isUsable(const ClientSession &session,
@@ -52,16 +56,18 @@ public:
     {
         updateSession = false;
 
-        if (result.policyType() == SupportedTypes::Client::ALLOW_PER_SESSION) {
+        switch (result.policyType()) {
+        case SupportedTypes::Client::ALLOW_PER_SESSION:
+        case SupportedTypes::Client::DENY_PER_SESSION:
             if (session == prevSession) {
                 return true;
             }
             LOGD("Previous session <" << prevSession << "> does not match current session <"
                     << session << ">");
             return false;
+        default:
+            return false;
         }
-
-        return false;
     }
 
     void invalidate() {}
@@ -71,8 +77,9 @@ public:
             case SupportedTypes::Client::ALLOW_ONCE:
             case SupportedTypes::Client::ALLOW_PER_SESSION:
                 return CYNARA_API_ACCESS_ALLOWED;
+            default:
+                return CYNARA_API_ACCESS_DENIED;
         }
-        return CYNARA_API_ACCESS_DENIED;
     }
 };
 

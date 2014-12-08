@@ -82,8 +82,10 @@ public:
                 requiredAgent = AgentType(SupportedTypes::Agent::AgentType);
                 return PluginStatus::ANSWER_NOTREADY;
             }
-
-            result = PolicyResult(PredefinedPolicyType::ALLOW);
+            if (result.policyType() == SupportedTypes::Client::ALLOW_PER_LIFE)
+                result = PolicyResult(PredefinedPolicyType::ALLOW);
+            else
+                result = PolicyResult(PredefinedPolicyType::DENY);
             return PluginStatus::ANSWER_READY;
         } catch (const Translator::TranslateErrorException &e) {
             LOGE("Error translating request to data : " << e.what());
@@ -104,9 +106,13 @@ public:
         try {
             PolicyType resultType = Translator::Plugin::dataToAnswer(agentData);
             result = PolicyResult(resultType);
+
             if (resultType == SupportedTypes::Client::ALLOW_PER_LIFE) {
                 m_cache.update(Key(client, user, privilege), PolicyResult(resultType));
                 result = PolicyResult(PredefinedPolicyType::ALLOW);
+            } else if (resultType == SupportedTypes::Client::DENY_PER_LIFE) {
+                m_cache.update(Key(client, user, privilege), PolicyResult(resultType));
+                result = PolicyResult(PredefinedPolicyType::DENY);
             }
 
             return PluginStatus::SUCCESS;
