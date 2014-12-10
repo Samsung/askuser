@@ -20,6 +20,7 @@ PKG_CHECK_MODULES(AGENT_DEP
     REQUIRED
     cynara-agent
     cynara-plugin
+    notification
     )
 
 SET(ASKUSER_AGENT_PATH ${ASKUSER_PATH}/agent)
@@ -28,6 +29,7 @@ SET(ASKUSER_SOURCES
     ${ASKUSER_AGENT_PATH}/main/Agent.cpp
     ${ASKUSER_AGENT_PATH}/main/CynaraTalker.cpp
     ${ASKUSER_AGENT_PATH}/main/main.cpp
+    ${ASKUSER_AGENT_PATH}/ui/AskUINotificationBackend.cpp
     )
 
 INCLUDE_DIRECTORIES(

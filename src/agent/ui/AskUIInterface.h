@@ -49,7 +49,7 @@ public:
                        const std::string &privilege, RequestId requestId, UIResponseCallback) = 0;
     virtual bool setOutdated() = 0;
     virtual bool dismiss() = 0;
-    virtual bool isDismissing() = 0;
+    virtual bool isDismissing() const = 0;
 };
 
 typedef std::unique_ptr<AskUIInterface> AskUIInterfacePtr;

@@ -16,6 +16,7 @@ BuildRequires: pkgconfig(cynara-agent)
 BuildRequires: pkgconfig(cynara-plugin)
 BuildRequires: pkgconfig(libsystemd-daemon)
 BuildRequires: pkgconfig(libsystemd-journal)
+BuildRequires: pkgconfig(notification)
 BuildRequires: zip
 %{?systemd_requires}
 

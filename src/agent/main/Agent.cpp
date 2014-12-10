@@ -31,6 +31,8 @@
 #include <types/AgentErrorMsg.h>
 #include <types/SupportedTypes.h>
 
+#include <ui/AskUINotificationBackend.h>
+
 #include "Agent.h"
 
 namespace AskUser {
@@ -182,7 +184,7 @@ void Agent::processUIResponse(const Response &response) {
 
 bool Agent::startUIForRequest(Request *request) {
     auto data = Translator::Agent::dataToRequest(request->data());
-    AskUIInterfacePtr ui; // TODO: create pointer to backend
+    AskUIInterfacePtr ui(new AskUINotificationBackend());
 
     auto handler = [&](RequestId requestId, UIResponseType resultType) -> void {
                        UIResponseHandler(requestId, resultType);
@@ -191,6 +193,7 @@ bool Agent::startUIForRequest(Request *request) {
     if (ret) {
         m_UIs.insert(std::make_pair(request->id(), std::move(ui)));
     }
+
     return ret;
 }
 
