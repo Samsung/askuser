@@ -21,6 +21,7 @@
 
 #include <bundle.h>
 #include <cerrno>
+#include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -207,6 +208,15 @@ bool AskUINotificationBackend::dismiss() {
 }
 
 void AskUINotificationBackend::run() {
+    int ret;
+    sigset_t mask;
+
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGTERM);
+    if ((ret = sigprocmask(SIG_BLOCK, &mask, nullptr)) < 0) {
+        LOGE("sigprocmask failed [<<" << ret << "]");
+    }
+
     try {
         int buttonClicked = 0;
         notification_error_e ret = notification_wait_response(m_notification, m_responseTimeout,

@@ -19,6 +19,7 @@
  * @brief       This file implements class of cynara talker
  */
 
+#include <csignal>
 #include <string>
 
 #include <attributes/attributes.h>
@@ -101,7 +102,16 @@ bool CynaraTalker::stop() {
 }
 
 void CynaraTalker::run() {
-    int ret = cynara_agent_initialize(&m_cynara, SupportedTypes::Agent::AgentType);
+    int ret;
+    sigset_t mask;
+
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGTERM);
+    if ((ret = sigprocmask(SIG_BLOCK, &mask, nullptr)) < 0) {
+        LOGE("sigprocmask failed [<<" << ret << "]");
+    }
+
+    ret = cynara_agent_initialize(&m_cynara, SupportedTypes::Agent::AgentType);
     if (ret != CYNARA_API_SUCCESS) {
         LOGE("Initialization of cynara structure failed with error: [" << ret << "]");
         m_requestHandler(new Request(RT_Close, 0, nullptr, 0)); // Notify agent he should die
