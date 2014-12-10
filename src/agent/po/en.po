@@ -1,0 +1,14 @@
+msgid "SID_PRIVILEGE_REQUEST_DIALOG_TITLE"
+msgstr "Privilege request"
+
+msgid "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_NO"
+msgstr "No"
+
+msgid "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_YES"
+msgstr "Yes"
+
+msgid "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_YES_FOR_SESSION"
+msgstr "Yes, for current session"
+
+msgid "SID_PRIVILEGE_REQUEST_DIALOG_MESSAGE"
+msgstr "Application: %s, ran by user: %s, requested privilege:\n%s\nGrant access to privilege?"

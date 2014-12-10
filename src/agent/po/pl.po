@@ -1,0 +1,15 @@
+msgid "SID_PRIVILEGE_REQUEST_DIALOG_TITLE"
+msgstr "Żądanie dostępu"
+
+msgid "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_NO"
+msgstr "Nie"
+
+msgid "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_YES"
+msgstr "Tak"
+
+msgid "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_YES_FOR_SESSION"
+msgstr "Tak, dla bieżącej sesji"
+
+msgid "SID_PRIVILEGE_REQUEST_DIALOG_MESSAGE"
+msgstr "Aplikacja: %s, uruchomiona przez użytkownika: %s, zażądała zasobu:\n %s\nUdzielić dostępu?"
+

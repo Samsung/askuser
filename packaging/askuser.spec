@@ -8,7 +8,10 @@ Source0:    %{name}-%{version}.tar.gz
 Source1001:    %{name}.manifest
 Source1002:    libaskuser-common.manifest
 Source1003:    askuser-plugins.manifest
+BuildRequires: capi-security-privilege-manager-devel
 BuildRequires: cmake
+BuildRequires: gettext-tools
+BuildRequires: pkgconfig(capi-base-common)
 BuildRequires: pkgconfig(cynara-agent)
 BuildRequires: pkgconfig(cynara-plugin)
 BuildRequires: pkgconfig(libsystemd-daemon)
@@ -62,6 +65,7 @@ make %{?jobs:-j%jobs}
 %install
 rm -rf %{buildroot}
 %make_install
+%find_lang %{name}
 
 %post
 systemctl daemon-reload
@@ -86,7 +90,7 @@ fi
 
 %postun -n libaskuser-common -p /sbin/ldconfig
 
-%files
+%files -f %{name}.lang
 %manifest %{name}.manifest
 %license LICENSE
 %attr(755,root,root) /usr/bin/%{name}

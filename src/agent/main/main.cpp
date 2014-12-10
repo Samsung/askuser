@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+ *  Copyright (c) 2014-2015 Samsung Electronics Co., Ltd All Rights Reserved
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
  * @brief       Main ask user daemon file
  */
 
+#include <clocale>
 #include <cstdlib>
 #include <exception>
 #include <systemd/sd-journal.h>
@@ -31,6 +32,9 @@
 
 int main(int argc UNUSED, char **argv UNUSED) {
     init_log();
+
+    char *locale = setlocale(LC_ALL, "");
+    LOGD("Current locale is: <" << locale << ">");
 
     try {
         AskUser::Agent::Agent agent;
