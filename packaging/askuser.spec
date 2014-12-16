@@ -32,6 +32,7 @@ askuser common library with common functionalities
 
 %package -n askuser-plugins
 Requires:   cynara
+Requires:   libcynara-client
 Summary:    Askuser commons library
 
 %description -n askuser-plugins
@@ -100,4 +101,5 @@ fi
 %files -n askuser-plugins
 %manifest askuser-plugins.manifest
 %license LICENSE
-%{_libdir}/cynara/plugin/*
+%{_libdir}/cynara/plugin/client/*
+%{_libdir}/cynara/plugin/service/*
