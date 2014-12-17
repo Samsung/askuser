@@ -144,10 +144,13 @@ bool AskUINotificationBackend::createUI(const std::string &client, const std::st
         return false;
     }
 
-    ret = std::snprintf(tmpBuffer, sizeof(tmpBuffer), "%s,%s,%s",
-                   dgettext(PROJECT_NAME, "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_NO"),
-                   dgettext(PROJECT_NAME, "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_YES"),
-                   dgettext(PROJECT_NAME, "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_YES_FOR_SESSION"));
+    ret = snprintf(tmpBuffer, sizeof(tmpBuffer), "%s,%s,%s,%s,%s,%s",
+                   dgettext(PROJECT_NAME, "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_NO_ONCE"),
+                   dgettext(PROJECT_NAME, "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_NO_SESSION"),
+                   dgettext(PROJECT_NAME, "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_NO_LIFE"),
+                   dgettext(PROJECT_NAME, "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_YES_ONCE"),
+                   dgettext(PROJECT_NAME, "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_YES_SESSION"),
+                   dgettext(PROJECT_NAME, "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_YES_LIFE"));
     if (ret < 0) {
         int erryes = errno;
         LOGE("sprintf failed with error: <" << strerror(erryes) << ">");
@@ -226,14 +229,14 @@ void AskUINotificationBackend::run() {
         UIResponseType response = URT_ERROR;
         if (ret == NOTIFICATION_ERROR_NONE) {
             if (buttonClicked) {
-                static UIResponseType responseType[] = {URT_NO, URT_YES, URT_SESSION};
+                static UIResponseType respType[] = {URT_NO_ONCE, URT_NO_SESSION, URT_NO_LIFE,
+                                                    URT_YES_ONCE, URT_YES_SESSION, URT_YES_LIFE};
                 LOGD("Got response from user: [" << buttonClicked << "]");
                 if (static_cast<unsigned int>(buttonClicked) >
-                                             sizeof(responseType) / sizeof(responseType[0])) {
+                                                        sizeof(respType) / sizeof(respType[0])) {
                     LOGE("Wrong code of response: [" << buttonClicked << "]");
-                    response = URT_NO;
                 } else {
-                    response = responseType[buttonClicked - 1];
+                    response = respType[buttonClicked - 1];
                 }
             } else {
                 LOGD("notification_wait_response, for request ID: [" << m_requestId <<
@@ -244,7 +247,7 @@ void AskUINotificationBackend::run() {
         m_responseCallback(m_requestId, response);
         LOGD("UI thread for request ID: [" << m_requestId << "] stopped execution");
     } catch (const std::exception &e) {
-        LOGC("Unexpected exception: <" << e.what() << ">");
+        LOGE("Unexpected exception: <" << e.what() << ">");
     } catch (...) {
         LOGE("Unexpected unknown exception caught!");
     }

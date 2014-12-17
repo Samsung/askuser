@@ -32,9 +32,12 @@ namespace AskUser {
 namespace Agent {
 
 typedef enum {
-    URT_YES,
-    URT_NO,
-    URT_SESSION,
+    URT_NO_ONCE,
+    URT_NO_SESSION,
+    URT_NO_LIFE,
+    URT_YES_ONCE,
+    URT_YES_SESSION,
+    URT_YES_LIFE,
     URT_TIMEOUT,
     URT_ERROR
 } UIResponseType;

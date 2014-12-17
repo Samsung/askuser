@@ -1,14 +1,23 @@
 msgid "SID_PRIVILEGE_REQUEST_DIALOG_TITLE"
 msgstr "Privilege request"
 
-msgid "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_NO"
+msgid "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_NO_ONCE"
 msgstr "No"
 
-msgid "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_YES"
+msgid "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_NO_SESSION"
+msgstr "No session"
+
+msgid "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_NO_LIFE"
+msgstr "No restart"
+
+msgid "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_YES_ONCE"
 msgstr "Yes"
 
-msgid "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_YES_FOR_SESSION"
-msgstr "Yes, for current session"
+msgid "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_YES_SESSION"
+msgstr "Yes session"
+
+msgid "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_YES_LIFE"
+msgstr "Yes restart"
 
 msgid "SID_PRIVILEGE_REQUEST_DIALOG_MESSAGE"
 msgstr "Application: %s, ran by user: %s, requested privilege:\n%s\nGrant access to privilege?"
