@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2014 Samsung Electronics Co.
+ *  Copyright (c) 2014-2015 Samsung Electronics Co.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
 #include <ostream>
 #include <cynara-plugin.h>
 
+#include <types/PolicyDescription.h>
 #include <types/SupportedTypes.h>
 #include <translator/Translator.h>
 
@@ -59,16 +60,19 @@ std::function<std::string(const Key&)> hasher = [](const Key &key) {
             std::to_string(privilege.size());
 };
 
-const std::vector<PolicyType> serviceTypes = {SupportedTypes::Service::ASK_USER};
+const std::vector<PolicyDescription> serviceDescriptions = {
+    { SupportedTypes::Service::ASK_USER, "Ask user" }
+};
 
 class AskUserPlugin : public ServicePluginInterface {
 public:
     AskUserPlugin()
         : m_cache(hasher)
     {}
-    const std::vector<PolicyType> &getSupportedPolicyTypes() {
-        return serviceTypes;
+    const std::vector<PolicyDescription> &getSupportedPolicyDescr() {
+        return serviceDescriptions;
     }
+
     PluginStatus check(const std::string &client,
                        const std::string &user,
                        const std::string &privilege,
