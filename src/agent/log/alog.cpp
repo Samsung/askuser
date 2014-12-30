@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Samsung Electronics Co., Ltd All Rights Reserved
+ * Copyright (c) 2015 Samsung Electronics Co., Ltd All Rights Reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,45 +14,45 @@
  * limitations under the License
  */
 /**
- * @file    src/common/log/log.cpp
+ * @file    alog.cpp
  * @author  Adam Malinowski <a.malinowsk2@partner.samsung.com>
- * @brief   Simple file containing defintion of logging level variable.
+ * @brief   Simple file containing definition of agent logging level variable.
  */
 
 #include <stdlib.h>
 
-#include "log.h"
+#include "alog.h"
 
 #ifdef BUILD_TYPE_DEBUG
-int __log_level = LOG_DEBUG;
+int __alog_level = LOG_DEBUG;
 #else
-int __log_level = LOG_ERR;
+int __alog_level = LOG_ERR;
 #endif
 
 static int strlog2intlog(const char *strlog) {
-    if(!strncmp("LOG_EMERG", strlog, strlen("LOG_EMERG")))
+    if (!strncmp("LOG_EMERG", strlog, strlen("LOG_EMERG")))
         return LOG_EMERG;
-    if(!strncmp("LOG_ALERT", strlog, strlen("LOG_ALERT")))
+    if (!strncmp("LOG_ALERT", strlog, strlen("LOG_ALERT")))
         return LOG_ALERT;
-    if(!strncmp("LOG_CRIT", strlog, strlen("LOG_CRIT")))
+    if (!strncmp("LOG_CRIT", strlog, strlen("LOG_CRIT")))
         return LOG_CRIT;
-    if(!strncmp("LOG_ERR", strlog, strlen("LOG_ERR")))
+    if (!strncmp("LOG_ERR", strlog, strlen("LOG_ERR")))
         return LOG_ERR;
-    if(!strncmp("LOG_WARNING", strlog, strlen("LOG_WARNING")))
+    if (!strncmp("LOG_WARNING", strlog, strlen("LOG_WARNING")))
         return LOG_WARNING;
-    if(!strncmp("LOG_NOTICE", strlog, strlen("LOG_NOTICE")))
+    if (!strncmp("LOG_NOTICE", strlog, strlen("LOG_NOTICE")))
         return LOG_NOTICE;
-    if(!strncmp("LOG_INFO", strlog, strlen("LOG_INFO")))
+    if (!strncmp("LOG_INFO", strlog, strlen("LOG_INFO")))
         return LOG_INFO;
-    if(!strncmp("LOG_DEBUG", strlog, strlen("LOG_DEBUG")))
+    if (!strncmp("LOG_DEBUG", strlog, strlen("LOG_DEBUG")))
         return LOG_DEBUG;
 
     return LOG_ERR;
 }
 
-void init_log(void) {
+void init_agent_log(void) {
     char *env_val = getenv("ASKUSER_LOG_LEVEL");
     if (env_val) {
-        __log_level = strlog2intlog(env_val);
+        __alog_level = strlog2intlog(env_val);
     }
 }

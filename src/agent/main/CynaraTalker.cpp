@@ -23,8 +23,9 @@
 #include <string>
 
 #include <attributes/attributes.h>
-#include <log/log.h>
 #include <types/SupportedTypes.h>
+
+#include <log/alog.h>
 
 #include "CynaraTalker.h"
 
@@ -79,7 +80,7 @@ CynaraTalker::CynaraTalker(RequestHandler requestHandler) : m_requestHandler(req
 
 bool CynaraTalker::start() {
     if (!m_requestHandler) {
-        LOGE("Empty request handler!");
+        ALOGE("Empty request handler!");
         return false;
     }
 
@@ -92,12 +93,12 @@ bool CynaraTalker::stop() {
     // We can only try to get rid of thread
     auto status = m_future.wait_for(std::chrono::milliseconds(10));
     if (status == std::future_status::ready) {
-        LOGD("Cynara thread finished and ready to join.");
+        ALOGD("Cynara thread finished and ready to join.");
         m_thread.join();
         return true;
     }
 
-    LOGD("Cynara thread not finished.");
+    ALOGD("Cynara thread not finished.");
     return false;
 }
 
@@ -108,12 +109,12 @@ void CynaraTalker::run() {
     sigemptyset(&mask);
     sigaddset(&mask, SIGTERM);
     if ((ret = sigprocmask(SIG_BLOCK, &mask, nullptr)) < 0) {
-        LOGE("sigprocmask failed [<<" << ret << "]");
+        ALOGE("sigprocmask failed [<<" << ret << "]");
     }
 
     ret = cynara_agent_initialize(&m_cynara, SupportedTypes::Agent::AgentType);
     if (ret != CYNARA_API_SUCCESS) {
-        LOGE("Initialization of cynara structure failed with error: [" << ret << "]");
+        ALOGE("Initialization of cynara structure failed with error: [" << ret << "]");
         m_requestHandler(new Request(RT_Close, 0, nullptr, 0)); // Notify agent he should die
         return;
     }
@@ -128,7 +129,7 @@ void CynaraTalker::run() {
 
             ret = cynara_agent_get_request(m_cynara, &req_type, &req_id, &data, &data_size);
             if (ret != CYNARA_API_SUCCESS) {
-                LOGE("Receiving request from cynara failed with error: [" << ret << "]");
+                ALOGE("Receiving request from cynara failed with error: [" << ret << "]");
                 m_requestHandler(new Request(RT_Close, 0, nullptr, 0));
                 break;
             }
@@ -137,15 +138,15 @@ void CynaraTalker::run() {
                 m_requestHandler(new Request(cynaraType2AgentType(req_type), req_id, data,
                                              data_size));
             } catch (const TypeException &e) {
-                LOGE("TypeException: <" << e.what() << "> Request dropped!");
+                ALOGE("TypeException: <" << e.what() << "> Request dropped!");
             }
             free(data);
             data = nullptr;
         }
     } catch (const std::exception &e) {
-        LOGC("Unexpected exception: <" << e.what() << ">");
+        ALOGC("Unexpected exception: <" << e.what() << ">");
     } catch (...) {
-        LOGE("Unexpected unknown exception caught!");
+        ALOGE("Unexpected unknown exception caught!");
     }
 
     free(data);
@@ -154,7 +155,7 @@ void CynaraTalker::run() {
     ret = cynara_agent_finish(m_cynara);
     m_cynara = nullptr;
     if (ret != CYNARA_API_SUCCESS) {
-        LOGE("Finishing cynara connection failed with error: [" << ret << "]");
+        ALOGE("Finishing cynara connection failed with error: [" << ret << "]");
     }
 
     m_threadFinished.set_value(true);
@@ -166,7 +167,7 @@ bool CynaraTalker::sendResponse(RequestType requestType, RequestId requestId,
     std::unique_lock<std::mutex> mlock(m_mutex);
 
     if (!m_cynara) {
-        LOGE("Trying to send response using uninitialized cynara connection!");
+        ALOGE("Trying to send response using uninitialized cynara connection!");
         return false;
     }
 
@@ -175,12 +176,12 @@ bool CynaraTalker::sendResponse(RequestType requestType, RequestId requestId,
         ret = cynara_agent_put_response(m_cynara, agentType2CynaraType(requestType), requestId,
                                             data.size() ? data.data() : nullptr, data.size());
     } catch (const TypeException &e) {
-        LOGE("TypeException: <" << e.what() << "> Response dropped!");
+        ALOGE("TypeException: <" << e.what() << "> Response dropped!");
         ret = CYNARA_API_INVALID_PARAM;
     }
 
     if (ret != CYNARA_API_SUCCESS) {
-        LOGE("Sending response to cynara failed with error: [" << ret << "]");
+        ALOGE("Sending response to cynara failed with error: [" << ret << "]");
         return false;
     }
 

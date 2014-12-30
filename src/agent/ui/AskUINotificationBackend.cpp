@@ -29,7 +29,8 @@
 #include <privilegemgr/privilege_info.h>
 
 #include <attributes/attributes.h>
-#include <log/log.h>
+
+#include <log/alog.h>
 
 #include "AskUINotificationBackend.h"
 
@@ -77,12 +78,12 @@ bool AskUINotificationBackend::start(const std::string &client, const std::strin
                                      const std::string &privilege, RequestId requestId,
                                      UIResponseCallback responseCallback) {
     if (!responseCallback) {
-        LOGE("Empty response callback is not allowed");
+        ALOGE("Empty response callback is not allowed");
         return false;
     }
 
     if (!createUI(client, user, privilege)) {
-        LOGE("UI window for request could not be created!");
+        ALOGE("UI window for request could not be created!");
         return false;
     }
 
@@ -99,13 +100,13 @@ bool AskUINotificationBackend::createUI(const std::string &client, const std::st
     m_notification = notification_new(NOTIFICATION_TYPE_NOTI, NOTIFICATION_GROUP_ID_NONE,
                                       NOTIFICATION_PRIV_ID_NONE);
     if (m_notification == nullptr) {
-        LOGE("Failed to create notification.");
+        ALOGE("Failed to create notification.");
         return false;
     }
 
     err = notification_set_pkgname(m_notification, "cynara-askuser");
     if (err != NOTIFICATION_ERROR_NONE) {
-        LOGE("Unable to set notification pkgname: <" << errorToString(err) << ">");
+        ALOGE("Unable to set notification pkgname: <" << errorToString(err) << ">");
         return false;
     }
 
@@ -113,7 +114,7 @@ bool AskUINotificationBackend::createUI(const std::string &client, const std::st
     err = notification_set_text(m_notification, NOTIFICATION_TEXT_TYPE_TITLE, dialogTitle, nullptr,
                                 NOTIFICATION_VARIABLE_TYPE_NONE);
     if (err != NOTIFICATION_ERROR_NONE) {
-        LOGE("Unable to set notification title: <" << errorToString(err) << ">");
+        ALOGE("Unable to set notification title: <" << errorToString(err) << ">");
         return false;
     }
 
@@ -121,10 +122,10 @@ bool AskUINotificationBackend::createUI(const std::string &client, const std::st
     char *privilegeDisplayName;
     int ret = privilege_info_get_privilege_display_name(privilege.c_str(), &privilegeDisplayName);
     if (ret != PRVMGR_ERR_NONE) {
-        LOGE("Unable to get privilege display name, err: [" << ret << "]");
+        ALOGE("Unable to get privilege display name, err: [" << ret << "]");
         privilegeDisplayName = strdup(privilege.c_str());
     }
-    LOGD("privilege_info_get_privilege_display_name: [" << ret << "],"
+    ALOGD("privilege_info_get_privilege_display_name: [" << ret << "],"
          " <" << privilegeDisplayName << ">");
 
     char tmpBuffer[BUFSIZ];
@@ -133,14 +134,14 @@ bool AskUINotificationBackend::createUI(const std::string &client, const std::st
     free(privilegeDisplayName);
     if (ret < 0) {
         int erryes = errno;
-        LOGE("sprintf failed with error: <" << strerror(erryes) << ">");
+        ALOGE("sprintf failed with error: <" << strerror(erryes) << ">");
         return false;
     }
 
     err = notification_set_text(m_notification, NOTIFICATION_TEXT_TYPE_CONTENT, tmpBuffer, nullptr,
                                 NOTIFICATION_VARIABLE_TYPE_NONE);
     if (err != NOTIFICATION_ERROR_NONE) {
-        LOGE("Unable to set notification content: <" << errorToString(err) << ">");
+        ALOGE("Unable to set notification content: <" << errorToString(err) << ">");
         return false;
     }
 
@@ -153,20 +154,20 @@ bool AskUINotificationBackend::createUI(const std::string &client, const std::st
                    dgettext(PROJECT_NAME, "SID_PRIVILEGE_REQUEST_DIALOG_BUTTON_YES_LIFE"));
     if (ret < 0) {
         int erryes = errno;
-        LOGE("sprintf failed with error: <" << strerror(erryes) << ">");
+        ALOGE("sprintf failed with error: <" << strerror(erryes) << ">");
         return false;
     }
 
     bundle *b = bundle_create();
     if (!b) {
         int erryes = errno;
-        LOGE("Unable to create bundle: <" << strerror(erryes) << ">");
+        ALOGE("Unable to create bundle: <" << strerror(erryes) << ">");
         return false;
     }
 
     if (bundle_add(b, "buttons", tmpBuffer)) {
         int erryes = errno;
-        LOGE("Unable to add button to bundle: <" << strerror(erryes) << ">");
+        ALOGE("Unable to add button to bundle: <" << strerror(erryes) << ">");
         bundle_free(b);
         return false;
     }
@@ -174,7 +175,7 @@ bool AskUINotificationBackend::createUI(const std::string &client, const std::st
     err = notification_set_execute_option(m_notification, NOTIFICATION_EXECUTE_TYPE_RESPONDING,
                                           nullptr, nullptr, b);
     if (err != NOTIFICATION_ERROR_NONE) {
-        LOGE("Unable to set execute option: <" << errorToString(err) << ">");
+        ALOGE("Unable to set execute option: <" << errorToString(err) << ">");
         bundle_free(b);
         return false;
     }
@@ -183,7 +184,7 @@ bool AskUINotificationBackend::createUI(const std::string &client, const std::st
 
     err = notification_insert(m_notification, nullptr);
     if (err != NOTIFICATION_ERROR_NONE) {
-        LOGE("Unable to insert notification: <" << errorToString(err) << ">");
+        ALOGE("Unable to insert notification: <" << errorToString(err) << ">");
         return false;
     }
 
@@ -201,12 +202,12 @@ bool AskUINotificationBackend::dismiss() {
     m_dismissing = true;
     auto status = m_future.wait_for(std::chrono::milliseconds(10));
     if (status == std::future_status::ready) {
-        LOGD("UI thread, for request: [" << m_requestId << "], finished and ready to join.");
+        ALOGD("UI thread, for request: [" << m_requestId << "], finished and ready to join.");
         m_thread.join();
         return true;
     }
 
-    LOGD("UI thread, for request: [" << m_requestId << "], not finished.");
+    ALOGD("UI thread, for request: [" << m_requestId << "], not finished.");
     return false;
 }
 
@@ -217,39 +218,39 @@ void AskUINotificationBackend::run() {
     sigemptyset(&mask);
     sigaddset(&mask, SIGTERM);
     if ((ret = sigprocmask(SIG_BLOCK, &mask, nullptr)) < 0) {
-        LOGE("sigprocmask failed [<<" << ret << "]");
+        ALOGE("sigprocmask failed [<<" << ret << "]");
     }
 
     try {
         int buttonClicked = 0;
         notification_error_e ret = notification_wait_response(m_notification, m_responseTimeout,
                                                               &buttonClicked, nullptr);
-        LOGD("notification_wait_response finished with ret code: [" << ret << "]");
+        ALOGD("notification_wait_response finished with ret code: [" << ret << "]");
 
         UIResponseType response = URT_ERROR;
         if (ret == NOTIFICATION_ERROR_NONE) {
             if (buttonClicked) {
                 static UIResponseType respType[] = {URT_NO_ONCE, URT_NO_SESSION, URT_NO_LIFE,
                                                     URT_YES_ONCE, URT_YES_SESSION, URT_YES_LIFE};
-                LOGD("Got response from user: [" << buttonClicked << "]");
+                ALOGD("Got response from user: [" << buttonClicked << "]");
                 if (static_cast<unsigned int>(buttonClicked) >
                                                         sizeof(respType) / sizeof(respType[0])) {
-                    LOGE("Wrong code of response: [" << buttonClicked << "]");
+                    ALOGE("Wrong code of response: [" << buttonClicked << "]");
                 } else {
                     response = respType[buttonClicked - 1];
                 }
             } else {
-                LOGD("notification_wait_response, for request ID: [" << m_requestId <<
+                ALOGD("notification_wait_response, for request ID: [" << m_requestId <<
                      "] timeouted");
                 response = URT_TIMEOUT;
             }
         }
         m_responseCallback(m_requestId, response);
-        LOGD("UI thread for request ID: [" << m_requestId << "] stopped execution");
+        ALOGD("UI thread for request ID: [" << m_requestId << "] stopped execution");
     } catch (const std::exception &e) {
-        LOGE("Unexpected exception: <" << e.what() << ">");
+        ALOGE("Unexpected exception: <" << e.what() << ">");
     } catch (...) {
-        LOGE("Unexpected unknown exception caught!");
+        ALOGE("Unexpected unknown exception caught!");
     }
     m_threadFinished.set_value(true);
 }

@@ -28,18 +28,19 @@
 #include <systemd/sd-daemon.h>
 
 #include <attributes/attributes.h>
-#include <log/log.h>
+
+#include <log/alog.h>
 
 #include "Agent.h"
 
 // Handle kill message from systemd
 void kill_handler(int sig UNUSED) {
-    LOGD("Ask user agent service is going down now");
+    ALOGD("Ask user agent service is going down now");
     AskUser::Agent::Agent::stop();
 }
 
 int main(int argc UNUSED, char **argv UNUSED) {
-    init_log();
+    init_agent_log();
 
     int ret;
     struct sigaction act;
@@ -48,29 +49,29 @@ int main(int argc UNUSED, char **argv UNUSED) {
     memset(&act, 0, sizeof(act));
     act.sa_handler = &kill_handler;
     if ((ret = sigaction(SIGTERM, &act, NULL)) < 0) {
-        LOGE("sigaction failed [<<" << ret << "]");
+        ALOGE("sigaction failed [<<" << ret << "]");
         return EXIT_FAILURE;
     }
 
     char *locale = setlocale(LC_ALL, "");
-    LOGD("Current locale is: <" << locale << ">");
+    ALOGD("Current locale is: <" << locale << ">");
 
     try {
         AskUser::Agent::Agent agent;
 
         int ret = sd_notify(0, "READY=1");
         if (ret == 0) {
-            LOGW("Agent was not configured to notify its status");
+            ALOGW("Agent was not configured to notify its status");
         } else if (ret < 0) {
-            LOGE("sd_notify failed: [" << ret << "]");
+            ALOGE("sd_notify failed: [" << ret << "]");
         }
 
         agent.run();
     } catch (const std::exception &e) {
-        LOGC("Agent stopped because of unhandled exception: <" << e.what() << ">");
+        ALOGC("Agent stopped because of unhandled exception: <" << e.what() << ">");
         return EXIT_FAILURE;
     } catch (...) {
-        LOGC("Agent stopped because of unknown unhandled exception.");
+        ALOGC("Agent stopped because of unknown unhandled exception.");
         return EXIT_FAILURE;
     }
 
