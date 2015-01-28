@@ -8,6 +8,7 @@ Source0:    %{name}-%{version}.tar.gz
 Source1001:    %{name}.manifest
 Source1002:    libaskuser-common.manifest
 Source1003:    askuser-plugins.manifest
+Source1004:    askuser-test.manifest
 BuildRequires: capi-security-privilege-manager-devel
 BuildRequires: cmake
 BuildRequires: gettext-tools
@@ -41,11 +42,19 @@ Summary:    Askuser commons library
 %description -n askuser-plugins
 askuser plugin library with cynara service and client side plugins
 
+%package -n askuser-test
+BuildRequires: pkgconfig(cynara-client)
+Summary:    Simple tools for testing cynara extensions
+
+%description -n askuser-test
+utility for testing askuser extensions
+
 %prep
 %setup -q
 cp -a %{SOURCE1001} .
 cp -a %{SOURCE1002} .
 cp -a %{SOURCE1003} .
+cp -a %{SOURCE1004} .
 
 %build
 %if 0%{?sec_build_binary_debug_enable}
@@ -107,3 +116,9 @@ fi
 %license LICENSE
 %{_libdir}/cynara/plugin/client/*
 %{_libdir}/cynara/plugin/service/*
+
+%files -n askuser-test
+%manifest askuser-test.manifest
+%license LICENSE
+%attr(755,root,root) /usr/bin/askuser-test-client
+%attr(755,root,root) /usr/bin/askuser-test.sh
