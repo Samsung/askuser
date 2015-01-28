@@ -20,7 +20,7 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.3)
 PROJECT("askuser")
-set(ASKUSER_VERSION 0.0.1)
+set(ASKUSER_VERSION 0.1.0)
 
 ############################# cmake packages ##################################
 

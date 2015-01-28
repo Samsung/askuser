@@ -1,6 +1,6 @@
 Name:       askuser
 Summary:    Agent service for Cynara 'ask user' policy
-Version:    0.0.1
+Version:    0.1.0
 Release:    1
 Group:      Security/Access Control
 License:    Apache-2.0

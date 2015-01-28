@@ -1,0 +1,12 @@
+Release: 0.1.0
+Date:    2015.01.28
+Name:    First version of askuser agent and plugins
+
+Libraries:
+libaskuser-common.0.1.0
+
+Description:
+First version of askuser extension. Contains agent based on tizen
+notification system and plugins for cynara service and clients.
+
+##############################
