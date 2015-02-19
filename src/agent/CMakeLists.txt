@@ -21,6 +21,7 @@ PKG_CHECK_MODULES(AGENT_DEP
     cynara-agent
     cynara-plugin
     notification
+    libsystemd-daemon
     )
 
 SET(ASKUSER_AGENT_PATH ${ASKUSER_PATH}/agent)
