@@ -23,6 +23,8 @@
 
 #include <atomic>
 #include <notification.h>
+#include <notification_internal.h>
+#include <notification_error.h>
 #include <future>
 #include <thread>
 
