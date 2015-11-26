@@ -16,6 +16,6 @@
 # @author      Adam Malinowski <a.malinowsk2@partner.samsung.com>
 #
 
-INSTALL(FILES ${CMAKE_SOURCE_DIR}/test/askuser-test.sh DESTINATION ${BIN_INSTALL_DIR})
+INSTALL(FILES ${CMAKE_SOURCE_DIR}/test/askuser-test.sh DESTINATION ${BIN_DIR})
 
 ADD_SUBDIRECTORY(client)

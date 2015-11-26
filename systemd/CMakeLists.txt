@@ -19,6 +19,6 @@
 INSTALL(FILES
     ${CMAKE_SOURCE_DIR}/systemd/${PROJECT_NAME}.service
     DESTINATION
-    lib/systemd/system
+    ${SYSTEMD_UNIT_DIR}
 )
 
