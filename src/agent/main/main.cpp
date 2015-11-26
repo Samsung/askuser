@@ -24,8 +24,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <exception>
-#include <systemd/sd-journal.h>
+#ifdef BUILD_WITH_SYSTEMD
 #include <systemd/sd-daemon.h>
+#endif
 
 #include <attributes/attributes.h>
 
@@ -59,12 +60,14 @@ int main(int argc UNUSED, char **argv UNUSED) {
     try {
         AskUser::Agent::Agent agent;
 
+#ifdef BUILD_WITH_SYSTEMD
         int ret = sd_notify(0, "READY=1");
         if (ret == 0) {
             ALOGW("Agent was not configured to notify its status");
         } else if (ret < 0) {
             ALOGE("sd_notify failed: [" << ret << "]");
         }
+#endif
 
         agent.run();
     } catch (const std::exception &e) {

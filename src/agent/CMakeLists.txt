@@ -21,7 +21,6 @@ PKG_CHECK_MODULES(AGENT_DEP
     cynara-agent
     cynara-plugin
     notification
-    libsystemd-daemon
     )
 
 SET(ASKUSER_AGENT_PATH ${ASKUSER_PATH}/agent)
@@ -37,6 +36,7 @@ SET(ASKUSER_SOURCES
 INCLUDE_DIRECTORIES(
     ${ASKUSER_PATH}/common
     ${AGENT_DEP_INCLUDE_DIRS}
+    ${SYSTEMD_DEP_INCLUDE_DIRS}
     ${ASKUSER_AGENT_PATH}
     )
 
@@ -45,6 +45,7 @@ ADD_EXECUTABLE(${TARGET_ASKUSER} ${ASKUSER_SOURCES})
 TARGET_LINK_LIBRARIES(${TARGET_ASKUSER}
     ${AGENT_DEP_LIBRARIES}
     ${ASKUSER_DEP_LIBRARIES}
+    ${SYSTEMD_DEP_LIBRARIES}
     ${TARGET_ASKUSER_COMMON}
     -lcapi-security-privilege-manager
     )
