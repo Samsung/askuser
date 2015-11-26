@@ -18,6 +18,7 @@
 /**
  * @file        alog.h
  * @author      Adam Malinowski <a.malinowsk2@partner.samsung.com>
+ * @author      Lukasz Wojciechowski <l.wojciechow@partner.samsung.com>
  * @version     1.0
  * @brief       This file defines agent logging utilities.
  */
@@ -25,16 +26,43 @@
 #pragma once
 
 #include <sstream>
+
+#ifdef BUILD_WITH_SYSTEMD
 #include <systemd/sd-journal.h>
+#else // BUILD_WITH_SYSTEMD
+#include <syslog.h>
+#endif // BUILD_WITH_SYSTEMD
 
 extern int __alog_level;
+
+#define UNUSED __attribute__((unused))
+
+namespace {
+    template <typename ...Args>
+    void UNUSED __ALOG_FUN(int level, const std::stringstream &format, Args&&... args) {
+#ifdef BUILD_WITH_SYSTEMD
+        sd_journal_print(level, format.str().c_str(), std::forward<Args>(args)...);
+#else // BUILD_WITH_SYSTEMD
+        syslog(level, format.str().c_str(), std::forward<Args>(args)...);
+#endif // BUILD_WITH_SYSTEMD
+    }
+
+    template <>
+    void UNUSED __ALOG_FUN(int level, const std::stringstream &format) {
+#ifdef BUILD_WITH_SYSTEMD
+        sd_journal_print(level, "%s", format.str().c_str());
+#else // BUILD_WITH_SYSTEMD
+        syslog(level, "%s", format.str().c_str());
+#endif // BUILD_WITH_SYSTEMD
+    }
+} // namespace anonymous
 
 #define __ALOG(LEVEL, FORMAT, ...) \
     do { \
         if (LEVEL <= __alog_level) { \
-            std::stringstream __LOG_MACRO_format; \
-            __LOG_MACRO_format << FORMAT; \
-            sd_journal_print(LEVEL, __LOG_MACRO_format.str().c_str(), ##__VA_ARGS__); \
+            std::stringstream __ALOG_MACRO_format; \
+            __ALOG_MACRO_format << FORMAT; \
+            __ALOG_FUN(LEVEL, __ALOG_MACRO_format, ##__VA_ARGS__); \
         } \
     } while (0)
 
