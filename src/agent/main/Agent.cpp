@@ -38,6 +38,10 @@
 #include <ui/AskUINotificationBackend.h>
 #endif
 
+#ifdef BUILD_WITH_LIBNOTIFY
+#include <ui/AskUILibNotifyBackend.h>
+#endif
+
 #include "Agent.h"
 
 namespace AskUser {
@@ -209,10 +213,14 @@ void Agent::processUIResponse(const Response &response) {
 
 AskUIInterfacePtr Agent::createBackend() {
 #ifdef BUILD_WITH_NOTIFICATION
-    return new AskUINotificationBackend();
+    return AskUIInterfacePtr(new AskUINotificationBackend());
+#else
+#ifdef BUILD_WITH_LIBNOTIFY
+    return AskUIInterfacePtr(new AskUILibNotifyBackend());
 #else
 #error "No suitable backend to use"
-#endif
+#endif //BUILD_WITH_LIBNOTIFY
+#endif //BUILD_WITH_NOTIFICATION
 }
 
 bool Agent::startUIForRequest(Request *request) {
