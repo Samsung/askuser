@@ -64,6 +64,7 @@ private:
 
     void requestHandler(Request *request);
     void processCynaraRequest(Request *request);
+    AskUIInterfacePtr createBackend();
     bool startUIForRequest(Request *request);
     void UIResponseHandler(RequestId requestId, UIResponseType responseType);
 

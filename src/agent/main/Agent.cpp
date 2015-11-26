@@ -33,7 +33,10 @@
 #include <types/SupportedTypes.h>
 
 #include <log/alog.h>
+
+#ifdef BUILD_WITH_NOTIFICATION
 #include <ui/AskUINotificationBackend.h>
+#endif
 
 #include "Agent.h"
 
@@ -204,9 +207,17 @@ void Agent::processUIResponse(const Response &response) {
     dismissUI(response.id());
 }
 
+AskUIInterfacePtr Agent::createBackend() {
+#ifdef BUILD_WITH_NOTIFICATION
+    return new AskUINotificationBackend();
+#else
+#error "No suitable backend to use"
+#endif
+}
+
 bool Agent::startUIForRequest(Request *request) {
     auto data = Translator::Agent::dataToRequest(request->data());
-    AskUIInterfacePtr ui(new AskUINotificationBackend());
+    AskUIInterfacePtr ui(createBackend());
 
     auto handler = [&](RequestId requestId, UIResponseType resultType) -> void {
                        UIResponseHandler(requestId, resultType);
