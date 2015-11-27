@@ -29,23 +29,11 @@
 #include <types/SupportedTypes.h>
 #include <translator/Translator.h>
 
+#include "Key.h"
+#include "PolicyResultSerialization.h"
 #include "CapacityCache.h"
 
 using namespace Cynara;
-
-typedef std::tuple<std::string, std::string, std::string> Key;
-std::ostream &operator<<(std::ostream &os, const Key &key) {
-    os << "client: " << std::get<0>(key)
-       << ", user: " << std::get<1>(key)
-       << ", privilege: " << std::get<2>(key);
-    return os;
-}
-
-std::ostream &operator<<(std::ostream &os, const PolicyResult &result) {
-    os << "type: " << result.policyType()
-       << ", metadata: " << result.metadata();
-    return os;
-}
 
 namespace AskUser {
 
