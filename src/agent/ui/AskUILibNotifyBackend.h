@@ -14,19 +14,28 @@
  *    limitations under the License.
  */
 /**
- * @file        AskUINotificationBackend.h
- * @author      Adam Malinowski <a.malinowsk2@partner.samsung.com>
- * @brief       This file declares class for ask user window
+ * @file        AskUILibNotifyBackend.h
+ * @author      Lukasz Wojciechowski <l.wojciechow@partner.samsung.com>
+ * @brief       This file declares class for ask user libnotify window
  */
 
 #pragma once
 
 #include <atomic>
-#include <notification.h>
-#include <notification_internal.h>
-#include <notification_error.h>
 #include <future>
 #include <thread>
+
+#include <libnotify/notification.h>
+#include <libnotify/notify-enum-types.h>
+#include <libnotify/notify-features.h>
+#include <libnotify/notify.h>
+
+#define DBUS_API_SUBJECT_TO_CHANGE
+
+#include <glib.h>
+#include <dbus/dbus.h>
+#include <dbus/dbus-glib.h>
+#include <dbus/dbus-glib-lowlevel.h>
 
 #include <ui/AskUIInterface.h>
 
@@ -34,10 +43,10 @@ namespace AskUser {
 
 namespace Agent {
 
-class AskUINotificationBackend : public AskUIInterface {
+class AskUILibNotifyBackend : public AskUIInterface {
 public:
-    AskUINotificationBackend();
-    virtual ~AskUINotificationBackend();
+    AskUILibNotifyBackend();
+    virtual ~AskUILibNotifyBackend();
 
     virtual bool start(const std::string &client, const std::string &user,
                        const std::string &privilege, RequestId requestId,
@@ -49,17 +58,20 @@ public:
     }
 
 private:
-    notification_h m_notification;
     std::thread m_thread;
     RequestId m_requestId;
+    std::atomic<UIResponseType> m_response;
     UIResponseCallback m_responseCallback;
-    static const int m_responseTimeout = 60; // seconds
     std::promise<bool> m_threadFinished;
     std::future<bool> m_future;
     std::atomic<bool> m_dismissing;
+    std::atomic<GMainLoop*> m_loop;
+    std::atomic<NotifyNotification*> m_note;
 
     void run();
     bool createUI(const std::string &client, const std::string &user, const std::string &privilege);
+    static void onAction(NotifyNotification *note, char *action, gpointer data);
+    static void onClose(NotifyNotification *note, gpointer data);
 };
 
 } // namespace Agent

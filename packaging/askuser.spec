@@ -69,7 +69,10 @@ export LDFLAGS+="-Wl,--rpath=%{_libdir}"
 
 %cmake . \
         -DCMAKE_BUILD_TYPE=%{?build_type} \
-        -DCMAKE_VERBOSE_MAKEFILE=ON
+        -DCMAKE_VERBOSE_MAKEFILE=ON \
+        -DLIB_DIR:PATH=%{_libdir} \
+        -DBIN_DIR:PATH=%{_bindir} \
+        -DSYSTEMD_UNIT_DIR:PATH=%{_unitdir}
 make %{?jobs:-j%jobs}
 
 %install

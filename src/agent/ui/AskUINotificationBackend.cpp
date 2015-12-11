@@ -36,11 +36,11 @@
 
 namespace {
 
-const char *errorToString(notification_error_e error) {
-    if (error == NOTIFICATION_ERROR_INVALID_DATA)
-        return "NOTIFICATION_ERROR_INVALID_DATA";
-    if (error == NOTIFICATION_ERROR_NO_MEMORY)
-        return "NOTIFICATION_ERROR_NO_MEMORY";
+const char *errorToString(int error) {
+    if (error == NOTIFICATION_ERROR_INVALID_PARAMETER)
+        return "NOTIFICATION_ERROR_INVALID_PARAMETER";
+    if (error == NOTIFICATION_ERROR_OUT_OF_MEMORY)
+        return "NOTIFICATION_ERROR_OUT_OF_MEMORY";
     if (error == NOTIFICATION_ERROR_FROM_DB)
         return "NOTIFICATION_ERROR_FROM_DB";
     if (error == NOTIFICATION_ERROR_ALREADY_EXIST_ID)
@@ -49,8 +49,8 @@ const char *errorToString(notification_error_e error) {
         return "NOTIFICATION_ERROR_FROM_DBUS";
     if (error == NOTIFICATION_ERROR_NOT_EXIST_ID)
         return "NOTIFICATION_ERROR_NOT_EXIST_ID";
-    if (error == NOTIFICATION_ERROR_IO)
-        return "NOTIFICATION_ERROR_IO";
+    if (error == NOTIFICATION_ERROR_IO_ERROR)
+        return "NOTIFICATION_ERROR_IO_ERROR";
     if (error == NOTIFICATION_ERROR_SERVICE_NOT_READY)
         return "NOTIFICATION_ERROR_SERVICE_NOT_READY";
     if (error == NOTIFICATION_ERROR_NONE)
@@ -95,7 +95,7 @@ bool AskUINotificationBackend::start(const std::string &client, const std::strin
 
 bool AskUINotificationBackend::createUI(const std::string &client, const std::string &user,
                                         const std::string &privilege) {
-    notification_error_e err;
+    int err;
 
     m_notification = notification_new(NOTIFICATION_TYPE_NOTI, NOTIFICATION_GROUP_ID_NONE,
                                       NOTIFICATION_PRIV_ID_NONE);
@@ -223,7 +223,7 @@ void AskUINotificationBackend::run() {
 
     try {
         int buttonClicked = 0;
-        notification_error_e ret = notification_wait_response(m_notification, m_responseTimeout,
+        int ret = notification_wait_response(m_notification, m_responseTimeout,
                                                               &buttonClicked, nullptr);
         ALOGD("notification_wait_response finished with ret code: [" << ret << "]");
 
