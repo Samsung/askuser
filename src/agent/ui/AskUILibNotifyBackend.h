@@ -21,6 +21,22 @@
 
 #pragma once
 
+#include <atomic>
+#include <future>
+#include <thread>
+
+#include <libnotify/notification.h>
+#include <libnotify/notify-enum-types.h>
+#include <libnotify/notify-features.h>
+#include <libnotify/notify.h>
+
+#define DBUS_API_SUBJECT_TO_CHANGE
+
+#include <glib.h>
+#include <dbus/dbus.h>
+#include <dbus/dbus-glib.h>
+#include <dbus/dbus-glib-lowlevel.h>
+
 #include <ui/AskUIInterface.h>
 
 namespace AskUser {
@@ -42,7 +58,20 @@ public:
     }
 
 private:
-    bool m_dismissing;
+    std::thread m_thread;
+    RequestId m_requestId;
+    std::atomic<UIResponseType> m_response;
+    UIResponseCallback m_responseCallback;
+    std::promise<bool> m_threadFinished;
+    std::future<bool> m_future;
+    std::atomic<bool> m_dismissing;
+    std::atomic<GMainLoop*> m_loop;
+    std::atomic<NotifyNotification*> m_note;
+
+    void run();
+    bool createUI(const std::string &client, const std::string &user, const std::string &privilege);
+    static void onAction(NotifyNotification *note, char *action, gpointer data);
+    static void onClose(NotifyNotification *note, gpointer data);
 };
 
 } // namespace Agent

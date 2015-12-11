@@ -31,6 +31,9 @@ PKG_CHECK_MODULES(NOTIFICATION_DEP
 PKG_CHECK_MODULES(LIBNOTIFY_DEP
     QUIET
     libnotify
+    dbus-1
+    dbus-glib-1
+    glib-2.0
     )
 
 SET(ASKUSER_AGENT_PATH ${ASKUSER_PATH}/agent)
